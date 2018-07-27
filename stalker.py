@@ -3,9 +3,9 @@ import datetime
 import gsheet
 import instagram
 
-DOC_NAME = 'Linh Insta Test'
-SHEET_NAME = 'Sheet1'
-USERNAME_COL = 'IG Username'
+DOC_NAME = 'FERERRO ROCHER Malaysian influencers'
+SHEET_NAME = 'SHARIFAH'
+USERNAME_COL = 'Instagram username'
 FOLLOWERS_COL = 'Followers'
 LIKES_COL = 'Likes'
 COMMENTS_COL = 'Comments'
@@ -22,10 +22,11 @@ def main():
         try:
             user = instagram.User(record.username)
             record.update(followers=user.followers_count,
-                          likes=user.average_likes_recently,
-                          comments=user.average_comments_recently,
+                          likes=user.average_likes_recently * len(user.recent_posts),
+                          comments=user.average_comments_recently * len(user.recent_posts),
                           updated=today)
         except Exception as e:
+            raise
             record.update(updated='Error: {}'.format(e))
 
 

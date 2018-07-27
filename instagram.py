@@ -1,6 +1,7 @@
 from __future__ import division
 
 import time
+from pprint import pprint
 
 import humanize
 import requests
@@ -21,9 +22,12 @@ class User(object):
         url = 'https://www.instagram.com/{}/?__a=1'.format(self.username)
         resp = requests.get(url)
         if resp.status_code == 404:
-            raise ValueError("user not found".format(self.username))
+            raise ValueError("user not found: {}".format(self.username))
+        print(self.username)
+        print(url)
+        print(resp.text)
         self.data = resp.json()
-        self.recent_posts = [Post(data) for data in self.data['user']['media']['nodes']]
+        self.recent_posts = [Post(data['node']) for data in self.data['graphql']['user']['edge_owner_to_timeline_media']['edges']]
         self._loaded = True
 
     def __repr__(self):
@@ -44,32 +48,32 @@ class User(object):
     @property
     def is_private(self):
         self._require_load()
-        return self.data['user']['is_private']
+        return self.data['graphql']['user']['is_private']
 
     @property
     def fullname(self):
         self._require_load()
-        return self.data['user']['full_name']
+        return self.data['graphql']['user']['full_name']
 
     @property
     def biography(self):
         self._require_load()
-        return self.data['user']['biography']
+        return self.data['graphql']['user']['biography']
 
     @property
     def followers_count(self):
         self._require_load()
-        return self.data['user']['followed_by']['count']
+        return self.data['graphql']['user']['edge_followed_by']['count']
 
     @property
     def following_count(self):
         self._require_load()
-        return self.data['user']['follows']['count']
+        return self.data['graphql']['user']['edge_follow']['count']
 
     @property
     def posts_count(self):
         self._require_load()
-        return self.data['user']['media']['count']
+        return self.data['graphql']['user']['edge_owner_to_timeline_media']['count']
 
     @property
     def average_likes_recently(self):
@@ -114,11 +118,11 @@ class Post(object):
 
     @property
     def comments_count(self):
-        return self.data['comments']['count']
+        return self.data['edge_media_to_comment']['count']
 
     @property
     def likes_count(self):
-        return self.data['likes']['count']
+        return self.data['edge_liked_by']['count']
 
     @property
     def is_video(self):
